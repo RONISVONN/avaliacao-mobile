@@ -1,0 +1,2 @@
+# avaliacao-mobile-login
+Avaliação da Disciplina Mobile - Tela de Login, Cadastro, Atualizar e Listar Usuário. Com React Native usando o Expo.
