@@ -7,7 +7,8 @@
     <p>
         # Front-End
     </p>  
-    <img align='center' src='https://github.com/RONISVONN/avaliacao-mobile/tree/main/assets/apresentacao.gif'>
+
+    <img align='center' src='https://github.com/RONISVONN/avaliacao-mobile/blob/main/assets/apresentacao.gif'>
 </h2>
 
 <h2 align='center'>
