@@ -1,87 +1,96 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, Alert } from 'react-native';
-import axios from 'axios';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import styles from './styles';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import ButtonSaveUser from '../../components/ButtonSaveUser';
+import { getUserById, updateUser } from '../../services/use.service';
 
+import styles from './styles';
+
+// Define os tipos para os parâmetros de navegação
 type RootStackParamList = {
   ListUsers: undefined;
   NewUser: undefined;
   EditUser: { userId: string };
 };
 
+// Define os tipos para as props de navegação e rota
 type EditUserPageNavigationProp = NativeStackNavigationProp<RootStackParamList, 'EditUser'>;
 type EditUserPageRouteProp = RouteProp<RootStackParamList, 'EditUser'>;
 
 const EditUserPage: React.FC = () => {
+  // Inicializa as props de navegação e rota
   const navigation = useNavigation<EditUserPageNavigationProp>();
   const route = useRoute<EditUserPageRouteProp>();
-  const { userId } = route.params;
+  const { userId } = route.params; // Obtém o userId dos parâmetros da rota
 
+  // Inicializa as variáveis de estado para detalhes do usuário e estados de foco dos inputs
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const [isFocused1, setIsFocused1] = useState(false);
   const [isFocused2, setIsFocused2] = useState(false);
   const [isFocused3, setIsFocused3] = useState(false);
+  const [isFocused4, setIsFocused4] = useState(false);
 
+  // Cria referências para os campos de texto
   const inputRef1 = useRef<TextInput>(null);
   const inputRef2 = useRef<TextInput>(null);
   const inputRef3 = useRef<TextInput>(null);
+  const inputRef4 = useRef<TextInput>(null);
 
+  // Busca os dados do usuário quando o componente é montado
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUser = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-          setError('Token não encontrado');
-          return;
-        }
-
-        const response = await axios.get(`http://192.168.15.32:3030/users/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${JSON.parse(token)}`,
-          },
-        });
-
-        if (response && response.data) {
-          setName(response.data.name);
-          setUsername(response.data.username);
-        } else {
-          setError('Erro ao buscar dados do usuário.');
-        }
+        // Busca o usuário pelo ID
+        const user = await getUserById(userId); 
+        setName(user.name);
+        setUsername(user.username);
       } catch (error) {
-        setError('Erro ao buscar dados do usuário.');
+        Alert.alert('Erro', 'Ocorreu um erro ao buscar os dados do usuário.');
       }
     };
 
-    fetchUserData();
+    fetchUser();
   }, [userId]);
 
+  // Valida os campos de entrada
   const validateFields = () => {
     let isValid = true;
 
-    if (!name) {
-      setError('O campo Nome é obrigatório.');
+    if (!name && !username && !password && !confirmPassword) {
+      setError('Todos os campos são obrigatórios.');
       setIsFocused1(true);
-      isValid = false;
-    }
-
-    if (!username) {
-      setError('O campo Nome de usuário é obrigatório.');
       setIsFocused2(true);
-      isValid = false;
-    }
-
-    if (!password) {
-      setError('O campo Senha é obrigatório.');
       setIsFocused3(true);
+      setIsFocused4(true);
       isValid = false;
+    } else {
+      if (!name) {
+        setError('O campo Nome é obrigatório.');
+        setIsFocused1(true);
+        isValid = false;
+      } else if (!username) {
+        setError('O campo Nome de usuário é obrigatório.');
+        setIsFocused2(true);
+        isValid = false;
+      } else if (!password) {
+        setError('O campo Senha é obrigatório.');
+        setIsFocused3(true);
+        isValid = false;
+      } else if (!confirmPassword) {
+        setError('O campo Confirmar Senha é obrigatório.');
+        setIsFocused4(true);
+        isValid = false;
+      } else if (password !== confirmPassword) {
+        setError('As senhas não coincidem.');
+        setIsFocused4(true);
+        isValid = false;
+      }
     }
 
     if (isValid) {
@@ -91,6 +100,7 @@ const EditUserPage: React.FC = () => {
     return isValid;
   };
 
+  // Manipula a atualização do usuário
   const handleUpdateUser = async () => {
     if (!validateFields()) {
       return;
@@ -103,37 +113,22 @@ const EditUserPage: React.FC = () => {
         password,
       };
 
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        setError('Token não encontrado');
-        return;
-      }
-
-      const response = await axios.put(
-        `http://192.168.15.32:3030/users/${userId}`,
-        updatedUser,
-        {
-          headers: {
-            Authorization: `Bearer ${JSON.parse(token)}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        Alert.alert('Sucesso', 'Usuário atualizado com sucesso.');
-        navigation.navigate('ListUsers');
-      } else {
-        Alert.alert('Erro', 'Não foi possível atualizar o usuário.');
-      }
+      // Chama o serviço updateUser
+      await updateUser(userId, updatedUser); 
+      Alert.alert('Sucesso', 'Usuário atualizado com sucesso.');
+      // Navega de volta para a lista de usuários
+      navigation.navigate('ListUsers'); 
     } catch (error) {
       Alert.alert('Erro', 'Ocorreu um erro ao atualizar o usuário.');
     }
   };
 
+  // Manipula o evento de pressionar o botão
   const handleButtonPress = () => {
     inputRef1.current?.blur();
     inputRef2.current?.blur();
     inputRef3.current?.blur();
+    inputRef4.current?.blur();
     handleUpdateUser();
   };
 
@@ -174,6 +169,19 @@ const EditUserPage: React.FC = () => {
         placeholderTextColor="#ccc"
         onFocus={() => setIsFocused3(true)}
         onBlur={() => setIsFocused3(false)}
+      />
+
+      <Text style={styles.label}>Confirmar Senha:</Text>
+      <TextInput
+        ref={inputRef4}
+        style={[styles.input, isFocused4 && styles.inputFocused]}
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        secureTextEntry={true}
+        placeholder="Confirme sua senha"
+        placeholderTextColor="#ccc"
+        onFocus={() => setIsFocused4(true)}
+        onBlur={() => setIsFocused4(false)}
       />
 
       {error && <Text style={styles.error}>{error}</Text>}

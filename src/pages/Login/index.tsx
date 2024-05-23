@@ -15,6 +15,7 @@ type RootStackParamList = {
 type NavigationType = NavigationProp<RootStackParamList>;
 
 const LoginPage = () => {
+  // Obtém a instância de navegação
   const navigation = useNavigation<NavigationType>();
 
   // Estados para armazenar os valores do usuário e da senha
@@ -55,15 +56,19 @@ const LoginPage = () => {
           value={valueUsuario}
           onChangeText={handleChangeUsuario}
           placeholder="Login"
+          placeholderTextColor="#ccc"
           maxLength={20}
         />
         <MyTextInput
           value={valueSenha}
           onChangeText={handleChangeSenha}
           placeholder="Senha"
+          placeholderTextColor="#ccc"
           maxLength={20}
           secureTextEntry={true}
         />
+
+        {/* Componente de botão "Entrar" */}
         <MyButton onPress={handleEntrarPress} />
       </View>
 
@@ -71,10 +76,24 @@ const LoginPage = () => {
         <Text style={{ color: '#ccc', textAlign: 'center' }}>
           Usuário ADM
         </Text>
+
         <Text style={{ color: '#ccc', textAlign: 'center' }}>
           Login: uedsonreis | Senha: 123456
         </Text>
       </View>
+
+      <View style={{ marginTop: 20 }}>
+        <Text style={{ color: '#ccc', textAlign: 'center' }}>
+          Obs.: 1º - Configure a url da api com o ip da máquina no user.service.ts
+        </Text>
+      </View>
+
+      <View style={{ marginTop: 20 }}>
+        <Text style={{ color: '#ccc', textAlign: 'center' }}>
+          2º - Para editar o 'username' tem que adcionar no código da api na pasta 'user' - 'user.repository.ts' -  na função update - adicionando - 'finded.username = record.username' 
+        </Text>
+      </View>
+
     </SafeAreaView>
   );
 };

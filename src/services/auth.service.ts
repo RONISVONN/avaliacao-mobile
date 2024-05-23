@@ -1,35 +1,45 @@
-import axios from 'axios'
+// Importação do Axios para realizar requisições HTTP
+import axios from 'axios';
 
-import { User } from "../model/user"
-import { authRepository } from './auth.repository'
+// Importação do modelo de usuário
+import { User } from "../model/user";
 
+// Importação do repositório de autenticação para armazenar o usuário logado
+import { authRepository } from './auth.repository';
+
+// Classe responsável pelos serviços de autenticação
 class AuthService {
 
-    public async login(username: string, password: string) {
+    // Método para realizar o login do usuário
+    public async login(username: string, password: string): Promise<boolean> {
         try {
+            // Realiza uma requisição POST para o endpoint de login com as credenciais fornecidas
             const response = await axios.post('http://192.168.15.32:3030/auth/login', {
                 username,
                 password
-            });            
-              
-
-            const logged: User = response.data
-
-                if (logged && logged.token) {
-                    console.log('token - service - ' + logged.token)
-
-                    authRepository.setLoggedUser(logged)
-                    
-                    return true
-                } else {
-                    return false
-            }
+            });
             
+            // Obtém os dados de usuário da resposta
+            const logged: User = response.data;
+
+            // Verifica se o usuário está logado e se possui um token de autenticação
+            if (logged && logged.token) {
+                // Armazena o usuário logado no AsyncStorage
+                authRepository.setLoggedUser(logged);
+                
+                // Retorna verdadeiro para indicar que o login foi bem-sucedido
+                return true;
+            } else {
+                // Retorna falso se não houver um token na resposta
+                return false;
+            }
         } catch (error) {
-            return false
+            // Em caso de erro, retorna falso para indicar que o login falhou
+            return false;
         }
     }
 
 }
 
-export const authService = new AuthService()
+// Exporta uma instância da classe AuthService para uso em outras partes do aplicativo
+export const authService = new AuthService();

@@ -38,12 +38,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   error: {
-    color: '#007BFF', // Cor do texto de erro
+    color: '#007BFF', 
     marginTop: 10,
     marginBottom: 10,
   },
   inputError: {
-    color: '#007BFF', // Cor do texto de erro
+    color: '#007BFF',
     marginTop: 10,
     marginBottom: 10,
   }
